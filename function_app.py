@@ -51,10 +51,12 @@ def get_stock_data(symbol: str) -> dict:
 
 
 def get_managed_identity_token() -> str:
+    endpoint = os.environ["IDENTITY_ENDPOINT"]
+    header = os.environ["IDENTITY_HEADER"]
     resp = requests.get(
-        "http://169.254.169.254/metadata/identity/oauth2/token",
-        params={"api-version": "2018-02-01", "resource": "https://cognitiveservices.azure.com/"},
-        headers={"Metadata": "true"},
+        endpoint,
+        params={"api-version": "2019-08-01", "resource": "https://cognitiveservices.azure.com/"},
+        headers={"X-IDENTITY-HEADER": header},
         timeout=10
     )
     return resp.json()["access_token"]
