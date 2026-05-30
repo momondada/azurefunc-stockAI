@@ -1,5 +1,5 @@
 azure-functions
-azure-identity
 openai
 yfinance
 pandas
+requests

@@ -3,9 +3,9 @@ import logging
 import json
 import os
 from datetime import datetime
+import requests
 import yfinance as yf
 from openai import AzureOpenAI
-from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 app = func.FunctionApp(http_auth_level=func.AuthLevel.FUNCTION)
 
@@ -50,12 +50,19 @@ def get_stock_data(symbol: str) -> dict:
     }
 
 
-def analyze_with_gpt(stocks_data: list) -> str:
-    credential = DefaultAzureCredential()
-    token_provider = get_bearer_token_provider(credential, "https://cognitiveservices.azure.com/.default")
+def get_managed_identity_token() -> str:
+    resp = requests.get(
+        "http://169.254.169.254/metadata/identity/oauth2/token",
+        params={"api-version": "2018-02-01", "resource": "https://cognitiveservices.azure.com/"},
+        headers={"Metadata": "true"},
+        timeout=10
+    )
+    return resp.json()["access_token"]
 
+
+def analyze_with_gpt(stocks_data: list) -> str:
     client = AzureOpenAI(
-        azure_ad_token_provider=token_provider,
+        azure_ad_token=get_managed_identity_token(),
         api_version="2025-04-01-preview",
         azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"]
     )
