@@ -86,17 +86,14 @@ def analyze_with_gpt(stocks_data: list) -> str:
 最後提供整體市場觀察與優先推薦順序。
 請以繁體中文回答，格式清晰易讀。"""
 
-    response = client.chat.completions.create(
+    response = client.responses.create(
         model=os.environ.get("AZURE_OPENAI_DEPLOYMENT", "gpt-5.4-pro"),
-        messages=[
-            {"role": "system", "content": "你是一位擁有20年經驗的美股分析師，擅長技術分析、基本面分析、財報解讀與市場情緒判斷。"},
-            {"role": "user", "content": prompt}
-        ],
-        max_tokens=4000,
-        temperature=0.3
+        instructions="你是一位擁有20年經驗的美股分析師，擅長技術分析、基本面分析、財報解讀與市場情緒判斷。",
+        input=prompt,
+        max_output_tokens=4000,
     )
 
-    return response.choices[0].message.content
+    return response.output_text
 
 
 @app.route(route="analyze")
